@@ -1,0 +1,64 @@
+FROM php:7.2-fpm
+
+# install git
+RUN apt-get update && \
+        apt-get install -y --no-install-recommends git
+
+#install some base extensions
+RUN apt-get install -y \
+        zlib1g-dev \
+        zip \
+        libpng-dev \
+        exiftool \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libmcrypt-dev \
+        libicu-dev \
+        libpq-dev \
+        libxpm-dev \
+        libvpx-dev \
+        mariadb-client \
+        libxml2-dev
+
+# install python
+RUN apt-get install -y python2.7 python-pip python-dev python-setuptools
+RUN export PATH="$PATH:/home/{user_id}/.local/bin"
+
+RUN docker-php-ext-install -j$(nproc) \
+        zip \
+        exif \
+        bcmath \
+        intl \
+        pcntl \
+        mysqli \
+        pdo \
+        gd \
+        pdo_mysql \
+        pdo_pgsql \
+        mbstring \
+        soap \
+        opcache \
+        iconv
+
+# node 12.x install
+RUN curl -sL https://deb.nodesource.com/setup_12.x
+RUN apt-get install -y nodejs
+
+# Composer install
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+
+# Set volume
+# VOLUME ["/var/www/html", "/usr/local/etc/php/conf.d/php.ini"]
+
+# pip upgrade
+#RUN pip install --upgrade pip --no-cache-dir install --user numpy scipy matplotlib ipython jupyter pandas sympy nose sklearn
+
+
+# Set working directory
+WORKDIR /milc
+
+CMD ["php-fpm"]
+
+# Port expose
+EXPOSE 9000
